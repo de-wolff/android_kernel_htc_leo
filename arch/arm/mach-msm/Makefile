@@ -251,3 +251,5 @@ obj-$(CONFIG_MACH_MAHIMAHI) += board-mahimahi-smb329.o
 obj-$(CONFIG_MSM_SSBI) += ssbi.o
 
 obj-$(CONFIG_HTC_FB_CONSOLE) += htc_fb_console.o
+
+obj-$(CONFIG_FORCE_FAST_CHARGE) += fastchg.o

@@ -37,6 +37,8 @@
 #include <linux/gpio.h>
 #include <linux/switch.h>
 
+#include <linux/fastchg.h>
+
 #include <asm/mach-types.h>
 
 #include <mach/board.h>
@@ -1793,7 +1795,11 @@ static void charger_detect(struct usb_info *ui)
 		return;
 	msleep(10);
 	/* detect shorted D+/D-, indicating AC power */
+#ifdef CONFIG_FORCE_FAST_CHARGE
+	if (((readl(USB_PORTSC) & PORTSC_LS) != PORTSC_LS) || (force_fast_charge == 0)) {
+#else
 	if ((readl(USB_PORTSC) & PORTSC_LS) != PORTSC_LS) {
+#endif
 		printk(KERN_INFO "usb: not AC charger\n");
 		ui->connect_type = CONNECT_TYPE_UNKNOWN;
 		queue_delayed_work(ui->usb_wq, &ui->chg_work,

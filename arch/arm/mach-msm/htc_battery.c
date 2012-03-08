@@ -32,6 +32,7 @@
 #include <linux/rtc.h>
 #include <linux/workqueue.h>
 #include <linux/tps65200.h>
+#include <linux/fastchg.h>
 #ifdef CONFIG_HTC_BATTCHG_SMEM
 #include "smd_private.h"
 #endif
@@ -502,15 +503,14 @@ static int htc_cable_status_update(int status)
 	}
 
 	mutex_lock(&htc_batt_info.lock);
-#if 1
 	pr_info("batt: %s: %d -> %d\n", __func__, htc_batt_info.rep.charging_source, status);
 	if (status == htc_batt_info.rep.charging_source) {
 	/* When cable overvoltage(5V => 7V) A9 will report the same source, so only sent the uevent */
 		if (status == CHARGER_USB) {
-		power_supply_changed(&htc_power_supplies[CHARGER_USB]);
-		if (htc_batt_debug_mask & HTC_BATT_DEBUG_UEVT)
-		BATT_LOG("batt:(htc_cable_status_update)power_supply_changed: OverVoltage");
-	}
+			power_supply_changed(&htc_power_supplies[CHARGER_USB]);
+			if (htc_batt_debug_mask & HTC_BATT_DEBUG_UEVT)
+			BATT_LOG("batt:(htc_cable_status_update)power_supply_changed: OverVoltage");
+		}
 		mutex_unlock(&htc_batt_info.lock);
 		return 0;
 	}
@@ -524,7 +524,7 @@ static int htc_cable_status_update(int status)
 	update_wake_lock(status);
 	/*ARM9 report CHARGER_AC while plug in htc_adaptor which is identify by usbid*/
 	/*don't need to notify usb driver*/
-	if ((htc_batt_info.guage_driver == GUAGE_MODEM) && (status == CHARGER_AC)) {
+	if (((htc_batt_info.guage_driver == GUAGE_MODEM) && (status == CHARGER_AC)) || (force_fast_charge != 0)) {
 		htc_set_smem_cable_type(CHARGER_AC);
 		power_supply_changed(&htc_power_supplies[CHARGER_AC]);
 	} else
@@ -542,62 +542,6 @@ static int htc_cable_status_update(int status)
 		if (htc_batt_debug_mask & HTC_BATT_DEBUG_UEVT)
 		BATT_LOG("batt:(htc_cable_status_update)power_supply_changed: battery");
 	}
-
-#else
-	/* A9 reports USB charging when helf AC cable in and China AC charger. */
-	/* notify userspace USB charging first,
-	and then usb driver will notify AC while D+/D- Line short. */
-	/* China AC detection:
-	 * Write SMEM as USB first, and update SMEM to AC
-	 * if receives AC notification */
-	last_source = htc_batt_info.rep.charging_source;
-	if (status == CHARGER_USB && g_usb_online == 0) {
-		htc_set_smem_cable_type(CHARGER_USB);
-		htc_batt_info.rep.charging_source = CHARGER_USB;
-	} else {
-		htc_set_smem_cable_type(status);
-		htc_batt_info.rep.charging_source  = status;
-		/* usb driver will not notify usb offline. */
-		if (status == CHARGER_BATTERY && g_usb_online != 0)
-			g_usb_online = 0;
-	}
-
-	msm_hsusb_set_vbus_state(status == CHARGER_USB);
-	if (htc_batt_info.guage_driver == GUAGE_DS2784 ||
-		htc_batt_info.guage_driver == GUAGE_DS2746)
-		blocking_notifier_call_chain(&cable_status_notifier_list,
-			htc_batt_info.rep.charging_source, NULL);
-
-	if (htc_batt_info.rep.charging_source != last_source) {
-#if 1 //JH //this is for packet filter (notify port list while USB in/out)
-		update_port_list_charging_state(!(htc_batt_info.rep.charging_source == CHARGER_BATTERY));
-#endif
-		/* Lock suspend only when USB in for ADB or other USB functions. */
-		if (htc_batt_info.rep.charging_source == CHARGER_USB) {
-			wake_lock(&vbus_wake_lock);
-		} else if (__htc_power_policy()) {
-			/* Lock suspend for DOPOD charging animation */
-			wake_lock(&vbus_wake_lock);
-		} else {
-			if (htc_batt_info.rep.charging_source == CHARGER_AC
-				&& last_source == CHARGER_USB)
-				BATT_ERR("%s: USB->AC\n", __func__);
-			/* give userspace some time to see the uevent and update
-			 * LED state or whatnot...
-			 */
-			wake_lock_timeout(&vbus_wake_lock, HZ * 5);
-		}
-		if (htc_batt_info.rep.charging_source == CHARGER_BATTERY || last_source == CHARGER_BATTERY)
-			power_supply_changed(&htc_power_supplies[CHARGER_BATTERY]);
-		if (htc_batt_info.rep.charging_source == CHARGER_USB || last_source == CHARGER_USB)
-			power_supply_changed(&htc_power_supplies[CHARGER_USB]);
-		if (htc_batt_info.rep.charging_source == CHARGER_AC || last_source == CHARGER_AC)
-			power_supply_changed(&htc_power_supplies[CHARGER_AC]);
-		if (htc_batt_debug_mask & HTC_BATT_DEBUG_UEVT)
-			BATT_LOG("power_supply_changed: %s -> %s",
-				charger_tags[last_source], charger_tags[htc_batt_info.rep.charging_source]);
-	}
-#endif
 	mutex_unlock(&htc_batt_info.lock);
 
 	return rc;
@@ -642,7 +586,6 @@ EXPORT_SYMBOL(htc_get_usb_accessory_adc_level);
 and then usb driver will notify AC while D+/D- Line short. */
 static void usb_status_notifier_func(int online)
 {
-#if 1
 	pr_info("batt:online=%d",online);
 	/* TODO: replace charging_source to usb_status */
 	htc_batt_info.rep.charging_source = online;
@@ -661,20 +604,6 @@ static void usb_status_notifier_func(int online)
 		pr_err("\n\n ### htc_battery_code is not inited yet! ###\n\n");
 	}
 	update_wake_lock(htc_batt_info.rep.charging_source);
-#else
-	mutex_lock(&htc_batt_info.lock);
-	if (htc_batt_debug_mask & HTC_BATT_DEBUG_USB_NOTIFY)
-		BATT_LOG("%s: online=%d, g_usb_online=%d", __func__, online, g_usb_online);
-	if (g_usb_online != online) {
-		g_usb_online = online;
-		if (online == CHARGER_AC && htc_batt_info.rep.charging_source == CHARGER_USB) {
-			mutex_unlock(&htc_batt_info.lock);
-			htc_cable_status_update(CHARGER_AC);
-			mutex_lock(&htc_batt_info.lock);
-		}
-	}
-	mutex_unlock(&htc_batt_info.lock);
-#endif
 }
 
 static int htc_get_batt_info(struct battery_info_reply *buffer)
@@ -985,7 +914,7 @@ static int htc_power_get_property(struct power_supply *psy,
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
-		if (psy->type == POWER_SUPPLY_TYPE_MAINS) {
+		if (psy->type == POWER_SUPPLY_TYPE_MAINS || (force_fast_charge != 0)) {
 			val->intval = (charger ==  CHARGER_AC ? 1 : 0);
 			if (htc_batt_debug_mask & HTC_BATT_DEBUG_USER_QUERY)
 				BATT_LOG("%s: %s: online=%d", __func__, psy->name, val->intval);

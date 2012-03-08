@@ -63,6 +63,15 @@ config MSM_MDP40
 	bool
 	depends on ARCH_MSM7X30
 	default y
+	
+config FORCE_FAST_CHARGE
+	bool "Force AC charge mode at will"
+	default n
+	help
+	  Enable support in kernel for user to override FAST CHARGE,
+	  using a simple sysfs interface. It is disabled by default on boot
+	  Enabling this will only provide an option for user to override default settings
+	  under standard disclaimer of no implied or explicit warranty.
 
 config TURBO_MODE
 	bool "Turbo mode"
