@@ -1,6 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.32-ics
+# Linux kernel version: 2.6.32-gb
 # Wed Mar  7 22:35:16 2012
 #
 CONFIG_ARM=y
@@ -203,6 +203,7 @@ CONFIG_ARCH_MSM=y
 CONFIG_ARCH_QSD8X50=y
 CONFIG_ARCH_MSM_SCORPION=y
 CONFIG_MSM_MDP31=y
+CONFIG_FORCE_FAST_CHARGE=y
 # CONFIG_PERFLOCK is not set
 CONFIG_MSM_AMSS_VERSION=1550
 # CONFIG_MSM_AMSS_VERSION_6210 is not set
