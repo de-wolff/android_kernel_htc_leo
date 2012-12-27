@@ -87,17 +87,6 @@ static struct notifier_block task_nb = {
 };
 
 
-static void task_free_fn(struct work_struct *work)
-{
-	unsigned long flags;
-
-	task_free_unregister(&task_nb);
-	spin_lock_irqsave(&lowmem_deathpending_lock, flags);
-	lowmem_deathpending = NULL;
-	spin_unlock_irqrestore(&lowmem_deathpending_lock, flags);
-}
-static DECLARE_WORK(task_free_work, task_free_fn);
-
 static int
 task_notify_func(struct notifier_block *self, unsigned long val, void *data)
 {

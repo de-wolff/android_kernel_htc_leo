@@ -140,33 +140,6 @@ kgsl_allocate(struct kgsl_memdesc *memdesc,
 }
 
 static inline int
-memdesc_sg_phys(struct kgsl_memdesc *memdesc,
-		unsigned int physaddr, unsigned int size)
-{
-	struct page *page = phys_to_page(physaddr);
-
-	memdesc->sg = kmalloc(sizeof(struct scatterlist) * 1, GFP_KERNEL);
-	if (memdesc->sg == NULL)
-		return -ENOMEM;
-
-	memdesc->sglen = 1;
-	sg_init_table(memdesc->sg, 1);
-	sg_set_page(&memdesc->sg[0], page, size, 0);
-	return 0;
-}
-
-static inline int
-kgsl_allocate(struct kgsl_memdesc *memdesc,
-		struct kgsl_pagetable *pagetable, size_t size)
-{
-#ifdef CONFIG_MSM_KGSL_MMU
-	return kgsl_sharedmem_vmalloc(memdesc, pagetable, size);
-#else
-	return kgsl_sharedmem_ebimem(memdesc, pagetable, size);
-#endif
-}
-
-static inline int
 kgsl_allocate_user(struct kgsl_memdesc *memdesc,
 		struct kgsl_pagetable *pagetable,
 		size_t size, unsigned int flags)

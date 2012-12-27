@@ -62,14 +62,6 @@ struct adreno_gpudev;
 #define ADRENO_DEFAULT_PWRSCALE_POLICY  NULL
 #endif
 
-enum adreno_gpurev {
-	ADRENO_REV_UNKNOWN = 0,
-	ADRENO_REV_A200 = 200,
-	ADRENO_REV_A205 = 205,
-	ADRENO_REV_A220 = 220,
-	ADRENO_REV_A225 = 225,
-};
-
 struct adreno_gpudev;
 
 struct adreno_device {

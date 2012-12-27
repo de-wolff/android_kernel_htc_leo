@@ -154,19 +154,6 @@ struct kgsl_memdesc {
 struct kgsl_pagetable;
 struct kgsl_memdesc_ops;
 
-/* shared memory allocation */
-struct kgsl_memdesc {
-	struct kgsl_pagetable *pagetable;
-	void *hostptr;
-	unsigned int gpuaddr;
-	unsigned int physaddr;
-	unsigned int size;
-	unsigned int priv;
-	struct scatterlist *sg;
-	unsigned int sglen;
-	struct kgsl_memdesc_ops *ops;
-};
-
 struct kgsl_mem_entry {
 	struct kref refcount;
 	struct kgsl_memdesc memdesc;

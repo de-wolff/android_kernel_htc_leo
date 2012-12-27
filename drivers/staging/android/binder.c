@@ -2791,7 +2791,6 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		if (binder_context_mgr_node != NULL) {
 			binder_debug(BINDER_DEBUG_TOP_ERRORS,
 				"binder: BINDER_SET_CONTEXT_MGR already set\n");
-				     "binder: BINDER_SET_CONTEXT_MGR already set\n");
 			ret = -EBUSY;
 			goto err;
 		}

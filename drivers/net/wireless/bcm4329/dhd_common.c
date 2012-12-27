@@ -526,7 +526,8 @@ wl_show_host_event(wl_event_msg_t *event, void *event_data)
 {
 	uint i, status, reason;
 	bool group = FALSE, flush_txq = FALSE, link = FALSE;
-	char *auth_str, *event_name;
+	char *auth_str;
+	char *event_name;
 	uchar *buf;
 	char err_msg[256], eabuf[ETHER_ADDR_STR_LEN];
 	static struct {uint event; char *event_name;} event_names[] = {
