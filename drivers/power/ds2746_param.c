@@ -70,6 +70,13 @@ battery parameter helper functions
 
 ========================================================================================*/
 
+
+static short int full_charge = 0;
+
+module_param(full_charge, short, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+MODULE_PARM_DESC(full_charge, "overridden battery capicity");
+
+
 static INT32 get_id_index(struct battery_type *battery)
 {
 	int i;
@@ -706,8 +713,9 @@ static BOOL __battery_param_udpate(struct battery_type *battery)
 	if (batt_id_stable_counter < 3) {
 		if (batt_id_stable_counter == 0) {
 			/* first time to get the batt id*/
-			battery->id_index = batt_id_index;
-			battery->charge_full_design_mAh = FL_25[battery->id_index];
+			battery->id_index = batt_id_index;			
+			battery->charge_full_design_mAh = (full_charge == 0)?FL_25[battery->id_index]: full_charge;
+
 			battery->charge_full_real_mAh = battery->charge_full_design_mAh;
 			batt_id_stable_counter = 1;
 		}
@@ -729,7 +737,7 @@ static BOOL __battery_param_udpate(struct battery_type *battery)
 	//    battery->temp_01c 			  = get_temp_c((float)temp_R_kohm / ((float)temp_adc_resl/battery->temp_adc - 1))*10;
 	if(temp_01c == 700)
 		{
-		FL_25[battery->id_index] = 2300;
+		FL_25[battery->id_index] = (full_charge == 0)? 2300: full_charge;
 		battery->charge_full_real_mAh = FL_25[battery->id_index];
 		battery->charge_full_design_mAh = battery->charge_full_real_mAh;
 		temp_01c = 650 - battery->temp_adc*10;
@@ -752,7 +760,6 @@ static BOOL __battery_param_udpate(struct battery_type *battery)
 		printk(DRIVER_ZONE " invalid V(%d).\n", battery->voltage_mV);
 		return FALSE;
 	}
-
 	/*! star_lee 20100426 - minimum RARC is 0%*/
 	if (battery->RARC_01p <= 0) {
 		battery->RARC_01p = 0;
