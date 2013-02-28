@@ -37,6 +37,8 @@
 #include <linux/mmc/sdio_func.h>
 #include <linux/mmc/sdio_ids.h>
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 #if !defined(SDIO_VENDOR_ID_BROADCOM)
 #define SDIO_VENDOR_ID_BROADCOM		0x02d0
 #endif /* !defined(SDIO_VENDOR_ID_BROADCOM) */
@@ -68,6 +70,8 @@ void sdio_function_cleanup(void);
 
 #define DESCRIPTION "bcmsdh_sdmmc Driver"
 #define AUTHOR "Broadcom Corporation"
+
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 /* module param defaults */
 static int clockoverride = 0;

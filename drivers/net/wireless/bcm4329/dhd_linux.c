@@ -64,6 +64,9 @@
 #include <linux/platform_device.h>
 #ifdef CONFIG_WIFI_CONTROL_FUNC
 #include <linux/wlan_plat.h>
+
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 static struct wifi_platform_data *wifi_control_data = NULL;
 #endif
 struct semaphore wifi_control_sem;

@@ -36,6 +36,8 @@
 
 #include "siutils_priv.h"
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 STATIC uint32
 get_asd(si_t *sih, uint32 *eromptr, uint sp, uint ad, uint st,
 	uint32 *addrl, uint32 *addrh, uint32 *sizel, uint32 *sizeh);

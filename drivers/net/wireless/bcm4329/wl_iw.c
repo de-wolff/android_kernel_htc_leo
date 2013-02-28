@@ -157,6 +157,10 @@ extern int dhd_wait_pend8021x(struct net_device *dev);
 #define IW_EVENT_IDX(cmd)	((cmd) - IWEVFIRST)
 #endif 
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
+
 static void *g_scan = NULL;
 static volatile uint g_scan_specified_ssid;
 static wlc_ssid_t g_specific_ssid;

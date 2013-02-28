@@ -65,6 +65,8 @@
 #include <hndrte_armtrap.h>
 #endif /* DHD_DEBUG_TRAP */
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 #define QLEN		256	/* bulk rx and tx queue lengths */
 #define FCHI		(QLEN - 10)
 #define FCLOW		(FCHI / 2)

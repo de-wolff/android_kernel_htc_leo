@@ -48,6 +48,8 @@
 int wifi_get_mac_addr(unsigned char *buf);
 #endif /* GET_CUSTOM_MAC_ENABLE */
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 int dhd_msg_level;
 
 #include <wl_iw.h>

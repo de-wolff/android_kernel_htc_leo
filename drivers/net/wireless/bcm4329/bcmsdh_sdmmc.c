@@ -47,6 +47,8 @@ extern volatile bool dhd_mmc_suspend;
 #endif
 #include "bcmsdh_sdmmc.h"
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 #ifndef BCMSDH_MODULE
 extern int sdio_function_init(void);
 extern void sdio_function_cleanup(void);

@@ -38,6 +38,9 @@
 
 #include "siutils_priv.h"
 
+
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 /* local prototypes */
 static uint _sb_coreidx(si_info_t *sii, uint32 sba);
 static uint _sb_scan(si_info_t *sii, uint32 sba, void *regs, uint bus, uint32 sbba,

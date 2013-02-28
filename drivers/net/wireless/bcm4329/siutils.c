@@ -46,6 +46,9 @@
 
 #include "siutils_priv.h"
 
+
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 /* local prototypes */
 static si_info_t *si_doattach(si_info_t *sii, uint devid, osl_t *osh, void *regs,
                               uint bustype, void *sdh, char **vars, uint *varsz);
